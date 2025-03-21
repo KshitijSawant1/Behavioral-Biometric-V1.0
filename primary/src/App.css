@@ -1,0 +1,18 @@
+@import "tailwindcss";
+/* Background of the pattern lock area */
+.custom-pattern-lock {
+  background-color: #4b5563 !important; /* Darker Gray Background */
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Style the points (dots) */
+.custom-pattern-lock .point {
+  fill: #ffffff !important; /* White Dots */
+}
+
+/* Style the connecting lines */
+.custom-pattern-lock .connector {
+  stroke: #ffffff !important; /* White Connecting Lines */
+  stroke-width: 4px;
+}
