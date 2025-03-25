@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore"; // ✅ Update here
+import { doc, getDoc } from "firebase/firestore"; 
 
 const AuthSecondary = () => {
   const [blockId, setBlockId] = useState("");
   const navigate = useNavigate();
 
-  // ✅ Paste the updated handleSignin function here
   const handleSignin = async (e) => {
     e.preventDefault();
     if (!blockId.trim()) {
@@ -22,8 +21,10 @@ const AuthSecondary = () => {
       if (blockSnap.exists()) {
         const blockData = blockSnap.data();
         const userId = blockData.userID;
+        const visibleFields = blockData.visibleFields || {};
 
         localStorage.setItem("secondary_userID", userId);
+        localStorage.setItem("visible_fields", JSON.stringify(visibleFields)); // ✅ important
         navigate("/data");
       } else {
         alert("Invalid Block ID. Please try again.");

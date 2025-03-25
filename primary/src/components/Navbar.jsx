@@ -1,7 +1,23 @@
 import React from "react";
 import BBLogo from "../assets/BBLogo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
+
 const Navbar = () => {
+  const auth = getAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        localStorage.clear(); // optional: clear all local storage
+        navigate("/auth"); // or "/" if you want to redirect to home
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
+  };
+
   return (
     <div>
       <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -61,6 +77,14 @@ const Navbar = () => {
                 >
                   Secondary Webapp
                 </Link>
+              </li>
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="block py-2 px-3 text-red-600 rounded-md hover:bg-red-100 md:hover:bg-transparent md:hover:text-red-500 md:p-0 dark:text-red-400"
+                >
+                  Logout
+                </button>
               </li>
             </ul>
           </div>

@@ -1,39 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
 
 const Data = () => {
-  const [userData, setUserData] = useState(null);
+  const [visibleFields, setVisibleFields] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userId = localStorage.getItem("secondary_userID");
-      if (!userId) {
-        setError("No user ID found in session. Please log in again.");
-        setLoading(false);
-        return;
-      }
+    const savedFields = localStorage.getItem("visible_fields");
+    const userId = localStorage.getItem("secondary_userID");
 
-      try {
-        const userDocRef = doc(db, "users", userId);
-        const userDocSnap = await getDoc(userDocRef);
+    if (!userId) {
+      setError("No user ID found in session. Please log in again.");
+      setLoading(false);
+      return;
+    }
 
-        if (userDocSnap.exists()) {
-          setUserData(userDocSnap.data());
-        } else {
-          setError("User data not found");
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error("Error fetching user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!savedFields) {
+      setError("No visible field data found. Please regenerate your block.");
+      setLoading(false);
+      return;
+    }
 
-    fetchUserData();
+    try {
+      const parsed = JSON.parse(savedFields);
+      console.log("✅ Visible Fields Retrieved:", parsed);
+      setVisibleFields(parsed);
+    } catch (err) {
+      setError("Error reading visible fields.");
+      console.error("❌ Parsing error:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   if (loading) {
@@ -57,24 +54,17 @@ const Data = () => {
       <div className="bg-white p-6 rounded-lg shadow-md w-96">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">User Data</h1>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              First Name
-            </label>
-            <p className="mt-1 text-gray-900">{userData?.firstName || "N/A"}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Last Name
-            </label>
-            <p className="mt-1 text-gray-900">{userData?.lastName || "N/A"}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <p className="mt-1 text-gray-900">{userData?.email || "N/A"}</p>
-          </div>
+          {Object.entries(visibleFields).map(([key, value]) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700">
+                {key
+                  .replace(/_/g, " ")
+                  .replace(/\b\w/g, (c) => c.toUpperCase())}
+              </label>
+              <p className="mt-1 text-gray-900">{value || "N/A"}</p>
+            </div>
+          ))}
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
               User ID

@@ -32,23 +32,23 @@ const Dashboard = () => {
   const [patternResult, setPatternResult] = useState("");
   const [selectedFields, setSelectedFields] = useState({ name: true });
 
-  console.log("🔥 Dashboard Component Rendered");
+  console.log("Dashboard Component Rendered");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        console.log("✅ User Authenticated:", currentUser.uid);
+        console.log("User Authenticated:", currentUser.uid);
         setUser(currentUser);
 
         const fetchUserData = async () => {
           try {
-            console.log("🔄 Fetching user data...");
+            console.log("Fetching user data...");
             const userDoc = await getDoc(doc(db, "users", currentUser.uid));
             if (userDoc.exists()) {
               const userData = userDoc.data();
               setUsername(userData.firstName || "User");
               localStorage.setItem("username", userData.firstName);
-              console.log("✅ User Data Retrieved:", userData);
+              console.log("User Data Retrieved:", userData);
               setFormFields([
                 {
                   name: userData.firstName || "",
@@ -60,12 +60,12 @@ const Dashboard = () => {
               ]);
             }
           } catch (error) {
-            console.error("❌ Error fetching user data:", error);
+            console.error("Error fetching user data:", error);
           }
         };
         fetchUserData();
       } else {
-        console.warn("⚠️ No user authenticated!");
+        console.warn("No user authenticated!");
         setUser(null);
       }
     });
@@ -81,7 +81,6 @@ const Dashboard = () => {
   const handleFormChange = (index, event) => {
     const { name, type, checked, value } = event.target;
     let data = [...formFields];
-
     if (type === "checkbox") {
       setSelectedFields((prev) => ({
         ...prev,
@@ -92,18 +91,18 @@ const Dashboard = () => {
       setFormFields(data);
     }
 
-    console.log("✏️ Form Field Updated:", formFields);
+    console.log("Form Field Updated:", formFields);
   };
 
   const handleFinish = () => {
     setPatternResult(`Pattern Entered: ${pattern.join(" → ")}`);
-    console.log("🔐 Pattern Captured:", pattern);
+    console.log("Pattern Captured:", pattern);
   };
 
   const handleSaveBlock = async () => {
     if (!user) {
       alert("User not authenticated!");
-      console.warn("⚠️ Block creation failed: No authenticated user.");
+      console.warn("Block creation failed: No authenticated user.");
       return;
     }
 
@@ -134,10 +133,10 @@ const Dashboard = () => {
         { merge: true }
       );
 
-      console.log("✅ Block saved with ID:", blockRef.id);
+      console.log("Block saved with ID:", blockRef.id);
       alert(`Block Created! ID: ${blockRef.id}`);
     } catch (error) {
-      console.error("❌ Error saving block:", error);
+      console.error("Error saving block:", error);
     }
   };
 
@@ -155,6 +154,12 @@ const Dashboard = () => {
     }));
 
     setFormFields(updatedFields);
+
+    setSelectedFields((prev) => ({
+      ...prev,
+      [fieldKey]: false,
+    }));
+
     setShowModal(false);
     setNewField({ fieldName: "", fieldType: "text", fieldContent: "" });
   };
@@ -232,16 +237,14 @@ const Dashboard = () => {
                             value={form.phone}
                             onChange={(event) => handleFormChange(index, event)}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            required
                           />
                         </div>
                         <div className="flex items-center h-[42px] mt-8">
                           <input
                             type="checkbox"
-                            checked={form.phoneChecked}
-                            onChange={(event) =>
-                              handleFormChange(index, event, "phone")
-                            }
+                            checked={selectedFields["phone"] || false}
+                            name="phone"
+                            onChange={(event) => handleFormChange(index, event)}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </div>
@@ -263,16 +266,14 @@ const Dashboard = () => {
                             value={form.email}
                             onChange={(event) => handleFormChange(index, event)}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            required
                           />
                         </div>
                         <div className="flex items-center h-[42px] mt-8">
                           <input
                             type="checkbox"
-                            checked={form.emailChecked}
-                            onChange={(event) =>
-                              handleFormChange(index, event, "email")
-                            }
+                            checked={selectedFields["email"] || false}
+                            name="email"
+                            onChange={(event) => handleFormChange(index, event)}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </div>
@@ -294,16 +295,14 @@ const Dashboard = () => {
                             value={form.dob}
                             onChange={(event) => handleFormChange(index, event)}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            required
                           />
                         </div>
                         <div className="flex items-center h-[42px] mt-8">
                           <input
                             type="checkbox"
-                            checked={form.dobChecked}
-                            onChange={(event) =>
-                              handleFormChange(index, event, "dob")
-                            }
+                            checked={selectedFields["dob"] || false}
+                            name="dob"
+                            onChange={(event) => handleFormChange(index, event)}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </div>
@@ -325,16 +324,14 @@ const Dashboard = () => {
                             value={form.city}
                             onChange={(event) => handleFormChange(index, event)}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            required
                           />
                         </div>
                         <div className="flex items-center h-[42px] mt-8">
                           <input
                             type="checkbox"
-                            checked={form.cityChecked}
-                            onChange={(event) =>
-                              handleFormChange(index, event, "city")
-                            }
+                            checked={selectedFields["city"] || false}
+                            name="city"
+                            onChange={(event) => handleFormChange(index, event)}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </div>
@@ -369,6 +366,17 @@ const Dashboard = () => {
                                     handleFormChange(index, event)
                                   }
                                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                />
+                              </div>
+                              <div className="flex items-center h-[42px] mt-8">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFields[key] || false}
+                                  name={key}
+                                  onChange={(event) =>
+                                    handleFormChange(index, event)
+                                  }
+                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                                 />
                               </div>
                             </div>

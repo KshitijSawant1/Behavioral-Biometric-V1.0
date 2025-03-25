@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "../firebaseConfig";
 import {
   createUserWithEmailAndPassword,
@@ -17,11 +17,20 @@ const Auth = () => {
     password: "",
     confirmPassword: "",
   });
+  const [authError, setAuthError] = useState("");
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setAuthError(""); // Clear error on change
   };
 
   const handleSignup = async (e) => {
@@ -29,31 +38,36 @@ const Auth = () => {
     const { firstName, lastName, email, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setAuthError("Passwords do not match!");
       return;
     }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password
       );
       const user = userCredential.user;
 
-      // Store user details in Firestore
       await setDoc(doc(db, "users", user.uid), {
-        firstName,
-        lastName,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
       });
 
-      // Save username in localStorage
-      localStorage.setItem("username", firstName);
-
-      navigate("/dashboard"); // Redirect to Dashboard
+      localStorage.setItem("username", firstName.trim());
+      navigate("/dashboard");
     } catch (error) {
-      alert(error.message);
+      const errorMessages = {
+        "auth/invalid-email": "Invalid email format.",
+        "auth/user-not-found": "No account found with this email.",
+        "auth/wrong-password": "Incorrect password. Please try again.",
+      };
+
+      setAuthError(
+        errorMessages[error.code] || "An unexpected error occurred."
+      );
     }
   };
 
@@ -64,23 +78,22 @@ const Auth = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password
       );
       const user = userCredential.user;
 
-      // Retrieve user details from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        localStorage.setItem("username", userData.firstName); // Save first name
+        localStorage.setItem("username", userData.firstName);
       } else {
-        localStorage.setItem("username", "User"); // Default fallback
+        localStorage.setItem("username", "User");
       }
 
-      navigate("/dashboard"); // Redirect to Dashboard
+      navigate("/dashboard");
     } catch (error) {
-      alert(error.message);
+      setAuthError(error.message);
     }
   };
 
@@ -188,6 +201,12 @@ const Auth = () => {
             </button>
           </div>
         </form>
+        {/* Error Message */}
+        {authError && (
+          <div className="text-red-600 text-sm text-center -mt-4 mb-2">
+            {authError}
+          </div>
+        )}
 
         {/* Divider */}
         <div className="mt-6">
